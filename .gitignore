@@ -1,3 +1,5 @@
 TwistOAuth/
 data.csv
+tfidf_avg.csv
+tfidf_list.csv
 config.php

@@ -10,7 +10,7 @@ $params = array(
 	'count' => '100',
 	'lang' => 'ja'
 );
-$request_num = 10;
+$request_num = 50;
 $file = fopen('data.csv', 'w');
 for ($i = 0; $i < $request_num; $i++) {
 	$tweets_obj = $connection->get('search/tweets', $params);
@@ -35,8 +35,6 @@ fclose($file);
 $file = new SplFileObject('data.csv');
 $file->setFlags(SplFileObject::READ_CSV);
 if($file){
-	$i = 0;
-
 	$tf_list = array();
 	$line_cnt = array();
 	foreach ($file as $index => $line) {
@@ -71,7 +69,6 @@ if($file){
 				}
 			}
 		}
-		$i++;
 	}
 
 	// IDF計算
