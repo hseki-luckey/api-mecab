@@ -32,42 +32,51 @@ for ($i = 0; $i < $request_num; $i++) {
 }
 fclose($file);
 
+$i = 0;
 $file = new SplFileObject('data.csv');
 $file->setFlags(SplFileObject::READ_CSV);
 if($file){
 	$tf_list = array();
 	$line_cnt = array();
 	foreach ($file as $index => $line) {
-		list($account, $user, $tweet) = $line;
-		$words = \MeCab\split($tweet);
-		// TF計算
-		$word_cnt = array();
-		foreach ($words as $word) {
-			if(array_key_exists($word, $word_cnt)){
-				$word_cnt[$word] += 1;
-			}else{
-				$word_cnt += array($word => 1);
-			}
-		}
-		if($word_cnt){
-			$tf = array();
-			foreach ($word_cnt as $word => $cnt) {
-				// 1行あたりの出現回数 / 1行あたりの単語数
-				$tf += array($word => $cnt / count($words));
-			}
-		}
-		$tf_list += array($index => $tf);
-
-		// 単語が出現した行数
-		$words = array_unique($words);
-		foreach ($words as $key => $word) {
-			if(!empty($word)){
-				if(array_key_exists($word, $line_cnt)){
-					$line_cnt[$word] += 1;
+		if(isset($line[2])){
+			list($account, $user, $tweet) = $line;
+			// リプライ対応
+			$tweet = preg_replace('/@[a-zA-Z0-9_]+\s*/', '', $tweet);
+			// 記号を一部排除
+			$tweet = preg_replace("/[^ぁ-んァ-ンーa-zA-Z0-9一-龠０-９、。.,…\-\r]+/u",'' ,$tweet);
+			$words = \MeCab\split($tweet);
+			// TF計算
+			$word_cnt = array();
+			foreach ($words as $word) {
+				if(array_key_exists($word, $word_cnt)){
+					$word_cnt[$word] += 1;
 				}else{
-					$line_cnt += array($word => 1);
+					$word_cnt += array($word => 1);
 				}
 			}
+			if($word_cnt){
+				$tf = array();
+				foreach ($word_cnt as $word => $cnt) {
+					// 1行あたりの出現回数 / 1行あたりの単語数
+					$tf += array($word => $cnt / count($words));
+				}
+			}
+			$tf_list += array($index => $tf);
+
+			// 単語が出現した行数
+			$words = array_unique($words);
+			foreach ($words as $key => $word) {
+				if(!empty($word)){
+					if(array_key_exists($word, $line_cnt)){
+						$line_cnt[$word] += 1;
+					}else{
+						$line_cnt += array($word => 1);
+					}
+				}
+			}
+
+			$i++;
 		}
 	}
 
